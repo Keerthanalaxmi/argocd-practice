@@ -17,7 +17,7 @@ spec:
         - -c
         - |
           echo "Running smoke test..."
-          curl -f http://frontend/health || exit 1
+          curl -f http://frontend || exit 1
           echo "Smoke test passed!"
       restartPolicy: Never
 ---
