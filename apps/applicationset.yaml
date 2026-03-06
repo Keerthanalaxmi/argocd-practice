@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: nginx-environments
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/Keerthanalaxmi/argocd-practice.git
+      revision: main
+      directories:
+      - path: apps/*        # discovers apps/dev and apps/prod automatically
+  template:
+    metadata:
+      name: 'nginx-{{path.basename}}'   # nginx-dev, nginx-prod
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/Keerthanalaxmi/argocd-practice.git
+        targetRevision: main
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename}}'  # deploys to "dev" or "prod" namespace
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
