@@ -26,6 +26,11 @@ spec:
       containers:
       - name: database
         image: postgres:14
+        env:
+        - name: POSTGRES_PASSWORD
+          value: "postgres"        # in real world this comes from a Secret!
+        - name: POSTGRES_DB
+          value: "appdb"
 ---
 # Wave 1 — Backend (deploy after DB is healthy)
 apiVersion: apps/v1
