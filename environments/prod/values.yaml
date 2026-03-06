@@ -1,0 +1,5 @@
+replicaCount: 3
+namespace: prod
+image:
+  repository: nginx
+  tag: stable

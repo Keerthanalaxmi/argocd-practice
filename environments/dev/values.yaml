@@ -1,0 +1,5 @@
+replicaCount: 1
+namespace: dev
+image:
+  repository: nginx
+  tag: latest
