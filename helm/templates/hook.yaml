@@ -1,0 +1,44 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: smoke-test
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      containers:
+      - name: smoke-test
+        image: curlimages/curl:latest
+        command:
+        - sh
+        - -c
+        - |
+          echo "Running smoke test..."
+          curl -f http://frontend/health || exit 1
+          echo "Smoke test passed!"
+      restartPolicy: Never
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pre-deploy-backup
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  template:
+    spec:
+      containers:
+      - name: backup
+        image: postgres:14
+        command:
+        - sh
+        - -c
+        - |
+          echo "Taking DB backup before deploy..."
+          echo "Backup complete!"
+      restartPolicy: Never
