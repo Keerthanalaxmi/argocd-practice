@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root-app
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/Keerthanalaxmi/argocd-practice.git
+    targetRevision: main
+    path: bootstrap/        # 👈 watches this folder
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd       # 👈 ApplicationSet lives in argocd namespace
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
