@@ -13,7 +13,7 @@ spec:
     metadata:
       name: 'nginx-{{env}}'
     spec:
-      project: default
+      project: nginx-project
       sources:
         - repoURL: https://github.com/Keerthanalaxmi/argocd-practice.git
           targetRevision: main
