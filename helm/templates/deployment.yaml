@@ -1,23 +1,72 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: {{ .Values.app.name }}
-  namespace: {{ .Values.namespace }}
-spec:
-  replicas: {{ .Values.replicaCount }}
-  selector:
-    matchLabels:
-      app: {{ .Values.app.name }}
-  template:
-    metadata:
-      labels:
-        app: {{ .Values.app.name }}
-    spec:
-      containers:
-      - name: {{ .Values.app.name }}
-        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
----
 apiVersion: v1
 kind: Namespace
 metadata:
   name: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"    # namespaces always first!
+---
+# Wave 0 — Database (deploy first)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: database
+  template:
+    metadata:
+      labels:
+        app: database
+    spec:
+      containers:
+      - name: database
+        image: postgres:14
+---
+# Wave 1 — Backend (deploy after DB is healthy)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "1"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: nginx:{{ .Values.image.tag }}
+---
+# Wave 2 — Frontend (deploy last)
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: {{ .Values.namespace }}
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+      - name: frontend
+        image: nginx:{{ .Values.image.tag }}
